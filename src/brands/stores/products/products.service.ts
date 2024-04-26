@@ -73,8 +73,10 @@ export class ProductService {
     }
 
     for (const variationDto of variationDtos) {
+      // Create a new variation instance including the stock from the DTO
       const variation = new Variation();
       variation.name = variationDto.name;
+      variation.stock = variationDto.stock; // Handle the stock property
       variation.product = product;
 
       const savedVariation = await this.variationRepository.save(variation);
@@ -89,7 +91,7 @@ export class ProductService {
       }
     }
 
-    // Recuperar el producto con sus variaciones y precios utilizando createQueryBuilder
+    // Re-fetch the product with its variations and prices
     return this.productRepository
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.variations', 'variation')

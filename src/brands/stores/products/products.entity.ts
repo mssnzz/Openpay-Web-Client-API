@@ -30,6 +30,18 @@ export class Product {
   @Column({ nullable: true })
   imageUrl: string;
 
+  @Column({ nullable: true })
+  precioCompra: string;
+
+  @Column({ nullable: true })
+  precioVenta: string;
+
+  @Column({ nullable: true })
+  stockAvailable: string;
+
+  @Column({ nullable: true })
+  minimumStock: string;
+
   @ManyToMany(() => Category, (category) => category.products)
   @JoinTable() // This decorator specifies that this is the owner side of the relationship
   categories: Category[];

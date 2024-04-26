@@ -20,6 +20,9 @@ export class Brands {
   @Column('text')
   logoUrl: string;
 
+  @Column('text', { default: 'Retail' })
+  category: string;
+
   // Relación con la entidad User
   @ManyToMany(() => User, (user) => user.brands)
   @JoinTable() // Esto indica que esta entidad es propietaria de la relación y contiene la tabla de unión.
