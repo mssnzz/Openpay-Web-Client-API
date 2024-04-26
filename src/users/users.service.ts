@@ -7,6 +7,7 @@ import { Role } from './roles/roles.entity';
 import Store from '../brands/stores/stores.entity';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import Brands from 'src/brands/brands.entity';
 
 @Injectable()
 export class UserService {
@@ -18,6 +19,8 @@ export class UserService {
     @InjectRepository(Store) // Asegúrate de inyectar el repositorio de Store
     private storeRepository: Repository<Store>,
     private jwtService: JwtService,
+    @InjectRepository(Brands) // Inyecta el repositorio de Brands
+    private brandsRepository: Repository<Brands>,
   ) {}
 
   async create(
@@ -132,5 +135,81 @@ export class UserService {
     return {
       access_token: this.jwtService.sign(payload),
     };
+  }
+
+  async registerUser(
+    name: string,
+    email: string,
+    password: string, // Añade la contraseña como un parámetro
+  ): Promise<User> {
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = this.usersRepository.create({
+      name,
+      email,
+      password: hashedPassword, // Almacena la contraseña hasheada
+    });
+
+    return this.usersRepository.save(newUser);
+  }
+
+  async assignUserToBrand(userId: number, brandId: any): Promise<User> {
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+      relations: ['brands'],
+    });
+    if (!user) {
+      throw new Error('User not found');
+    }
+    const brand = await this.brandsRepository.findOne({
+      where: { id: brandId },
+    });
+    if (!brand) {
+      throw new Error('Brand not found');
+    }
+
+    user.brands = brand;
+    return this.usersRepository.save(user);
+  }
+
+  async getUserFromToken(token: string): Promise<User | undefined> {
+    try {
+      const decoded = this.jwtService.verify(token);
+      if (decoded?.sub) {
+        return this.usersRepository.findOne({
+          where: { id: decoded.sub },
+          relations: ['role', 'store', 'brands'], // Asegúrate de cargar las relaciones necesarias
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      return undefined;
+    }
+  }
+
+  // Method to assign a store to a user
+  async assignStoreToUser(userId: number, storeId: string): Promise<User> {
+    // Fetch the user and the store from the database
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+      relations: ['store'], // Ensure 'store' relationship is loaded to avoid overwriting existing relations if any
+    });
+    const store = await this.storeRepository.findOne({
+      where: { id: storeId },
+    });
+
+    // Check if the user and store actually exist
+    if (!user) {
+      throw new Error('User not found');
+    }
+    if (!store) {
+      throw new Error('Store not found');
+    }
+
+    // Assign the store to the user
+    user.store = store;
+
+    // Save the updated user entity
+    return this.usersRepository.save(user);
   }
 }

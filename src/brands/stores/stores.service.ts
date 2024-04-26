@@ -33,4 +33,11 @@ export class StoresService {
 
     return this.storeRepository.save(store);
   }
+  async findStoresByUserId(userId: string): Promise<Store[]> {
+    return this.storeRepository
+      .createQueryBuilder('store')
+      .leftJoinAndSelect('store.users', 'user')
+      .where('user.id = :userId', { userId })
+      .getMany();
+  }
 }

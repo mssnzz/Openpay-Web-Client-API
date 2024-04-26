@@ -1,7 +1,7 @@
 // product.service.ts
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Product } from './products.entity';
 import { CreateProductDto } from './products.dto';
 import { Category } from './categories/categories.entity';
@@ -98,5 +98,79 @@ export class ProductService {
       .getOne();
   }
 
-  // Add other methods as needed
+  async createWithVariations(
+    createProductDto: CreateProductDto,
+  ): Promise<Product> {
+    const { categoryIds, storeIds, variations, ...productData } =
+      createProductDto;
+
+    // Create product instance and save it to get an ID
+    let product = this.productRepository.create(productData);
+    product = await this.productRepository.save(product);
+
+    // Fetch categories and stores
+    const categories = await this.categoryRepository.findByIds(categoryIds);
+    const stores = await this.storeRepository.findByIds(storeIds);
+    if (!categories.length || !stores.length) {
+      throw new Error('Stores or categories not found.');
+    }
+
+    // Assign categories and stores to product and save again
+    product.categories = categories;
+    product.stores = stores;
+    product = await this.productRepository.save(product);
+
+    // Handle variations and their prices
+    for (const variationDto of variations) {
+      let variation = this.variationRepository.create({
+        name: variationDto.name,
+        stock: variationDto.stock,
+        product: product,
+      });
+      variation = await this.variationRepository.save(variation);
+
+      const prices = variationDto.prices.map((priceDto) => {
+        return this.priceRepository.create({
+          amount: priceDto.amount,
+          conditions: priceDto.conditions,
+          variation: variation,
+        });
+      });
+
+      for (const price of prices) {
+        await this.priceRepository.save(price);
+      }
+    }
+
+    // Optionally, re-fetch the product with all relations
+    return this.productRepository.findOne({
+      where: { id: product.id },
+      relations: ['categories', 'stores', 'variations', 'variations.prices'],
+    });
+  }
+  // product.service.ts
+
+  async deleteProducts(productIds: string[]): Promise<void> {
+    // Encuentra todos los productos que coinciden con los IDs proporcionados
+    const products = await this.productRepository.find({
+      where: {
+        id: In(productIds), // Usando el operador In para buscar todos los productos con los IDs en `productIds`
+      },
+      relations: ['variations', 'variations.prices'], // Incluyendo las relaciones
+    });
+
+    // Recorre cada producto para eliminar primero los precios y luego las variaciones
+    // Eliminar variaciones asociadas
+    // Assuming you want to delete prices related to variations when deleting a product
+    for (const product of products) {
+      // Delete prices via the variation relation
+      for (const variation of product.variations) {
+        await this.priceRepository.delete({ variation });
+      }
+      // Delete variations
+      await this.variationRepository.delete({ product });
+      // Delete product
+      await this.productRepository.remove(product);
+    }
+  }
 }

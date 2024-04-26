@@ -1,5 +1,13 @@
 // product.controller.ts
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { ProductService } from './products.service';
 import { CreateProductDto } from './products.dto';
 import { Product } from './products.entity';
@@ -10,10 +18,10 @@ export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Post()
-  async create(@Body() createProductDto: CreateProductDto): Promise<Product> {
-    return this.productService.create(createProductDto);
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async create(@Body() createProductDto: CreateProductDto) {
+    return this.productService.createWithVariations(createProductDto);
   }
-
   @Get('store/:storeId')
   getProductsByStore(@Param('storeId') storeId: string): Promise<Product[]> {
     return this.productService.findByStoreId(storeId);
@@ -28,4 +36,8 @@ export class ProductController {
   }
 
   // Add other endpoints as needed
+  @Post('delete') // Using POST for deletion to include a body
+  deleteProducts(@Body() body: { ids: string[] }) {
+    return this.productService.deleteProducts(body.ids);
+  }
 }

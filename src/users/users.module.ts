@@ -11,6 +11,8 @@ import { LogsModule } from './logs/logs.module';
 import Store from 'src/brands/stores/stores.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
+import { PassportModule } from '@nestjs/passport';
+import { JwtStrategy } from './strategy.guard';
 
 @Module({
   imports: [
@@ -19,6 +21,8 @@ import { AuthService } from './auth.service';
     PermissionModule,
     StoresModule,
     LogsModule,
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+
     TypeOrmModule.forFeature([Store]),
     JwtModule.register({
       secret: 'tu_super_secreto', // Usa una cadena secreta compleja y guárdala en variables de entorno
@@ -26,7 +30,7 @@ import { AuthService } from './auth.service';
     }),
   ],
   controllers: [UserController], // Añade el controlador aquí
-  providers: [UserService, AuthService],
+  providers: [UserService, AuthService, JwtStrategy],
   exports: [UserService],
 })
 export class UserModule {}

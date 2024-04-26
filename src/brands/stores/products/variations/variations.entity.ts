@@ -16,6 +16,9 @@ export class Variation {
   @Column()
   name: string;
 
+  @Column()
+  stock: number;
+
   @ManyToOne(() => Product, (product) => product.variations)
   product: Product;
 
