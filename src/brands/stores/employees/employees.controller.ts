@@ -12,6 +12,7 @@ export class EmployeesController {
   async create(
     @Body() createEmployeeDto: CreateEmployeeDto,
   ): Promise<Employee> {
+    console.log(createEmployeeDto);
     return this.employeeService.create(createEmployeeDto);
   }
 

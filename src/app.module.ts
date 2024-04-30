@@ -26,7 +26,7 @@ import { CategoryModule } from './brands/stores/products/categories/categories.m
       database: 'rabiasport', // reemplaza con el nombre de tu base de datos
       entities: [__dirname + '/**/*.entity{.ts,.js}'], // especifica la ubicación de tus entidades
       synchronize: true, // en desarrollo puede estar en true para sincronizar el esquema de la bd automáticamente
-      logging: true,
+      logging: false,
     }),
     UserModule,
     PermissionModule,

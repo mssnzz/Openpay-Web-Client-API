@@ -34,6 +34,9 @@ export class Store {
   @Column({ nullable: true })
   phone: string;
 
+  @Column({ nullable: true })
+  printService: string;
+
   // Relación con la entidad User
   @OneToMany(() => User, (user) => user.store) // Establece la relación inversa aquí
   users: User[];

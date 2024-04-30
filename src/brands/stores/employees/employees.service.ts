@@ -1,9 +1,5 @@
 // employee.service.ts
-import {
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Employee } from './employees.entity';
@@ -62,13 +58,6 @@ export class EmployeesService {
     if (!employee) {
       throw new NotFoundException(`Employee not found.`);
     }
-
-    if (!employee.clockedIn) {
-      throw new UnauthorizedException(
-        `Employee must clock in before logging in.`,
-      );
-    }
-
     return employee;
   }
 

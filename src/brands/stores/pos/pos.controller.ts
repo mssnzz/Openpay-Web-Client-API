@@ -18,7 +18,7 @@ export class PosController {
   create(@Body() body: any) {
     // Debes validar y extraer los parámetros necesarios del cuerpo de la solicitud.
     // Esto es solo un ejemplo. En una aplicación real, deberías validar los datos de entrada.
-    return this.posService.create(body.name, body.storeId);
+    return this.posService.create(body.name, body.store);
   }
   @Post('/pairing')
   async findByPairingCode(@Body() body: { pairingCode: string }) {

@@ -31,7 +31,7 @@ export class PosService {
     if (!store) {
       throw new Error('Store not found');
     }
-
+    console.log(storeUuid);
     const pos = this.posRepository.create({
       name,
       status: 'inactive',
