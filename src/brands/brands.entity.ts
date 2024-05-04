@@ -20,6 +20,9 @@ export class Brands {
   @Column('text')
   logoUrl: string;
 
+  @Column({ nullable: true })
+  logoWhite: string;
+
   @Column('text', { default: 'Retail' })
   category: string;
 
