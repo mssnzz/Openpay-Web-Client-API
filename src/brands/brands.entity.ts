@@ -23,6 +23,9 @@ export class Brands {
   @Column({ nullable: true })
   logoWhite: string;
 
+  @Column({ nullable: true })
+  color: string;
+
   @Column('text', { default: 'Retail' })
   category: string;
 
