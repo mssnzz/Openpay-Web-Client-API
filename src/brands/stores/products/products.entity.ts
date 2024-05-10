@@ -24,9 +24,6 @@ export class Product {
   @Column({ nullable: true })
   barcode: string;
 
-  @Column({ nullable: true })
-  imageUrl: string;
-
   @Column({ default: 'trash' })
   status: string;
 

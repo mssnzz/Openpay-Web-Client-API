@@ -21,6 +21,9 @@ export class Brands {
   logoUrl: string;
 
   @Column({ nullable: true })
+  logoInvoice: string;
+
+  @Column({ nullable: true })
   logoWhite: string;
 
   @Column({ nullable: true })
