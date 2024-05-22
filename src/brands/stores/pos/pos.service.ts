@@ -17,7 +17,7 @@ export class PosService {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let result = '';
     const charactersLength = characters.length;
-    for (let i = 0; i < 9; i++) {
+    for (let i = 0; i < 6; i++) {
       result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
     return result;
@@ -57,7 +57,7 @@ export class PosService {
     pairingCode: string,
     initialStatus: string,
     finalStatus: string,
-  ): Promise<{ pairingCode: string; storeName: string }> {
+  ): Promise<POS> {
     const pos = await this.posRepository.findOne({
       where: { pairingCode, status: initialStatus },
       relations: ['store'], // Cargar la relación con Store
@@ -74,12 +74,10 @@ export class PosService {
     pos.status = finalStatus; // Cambiar el estado
     await this.posRepository.save(pos);
 
-    // Devolver el código de emparejamiento y el nombre de la tienda
-    return {
-      pairingCode: pos.pairingCode,
-      storeName: pos.store.name, // Asegúrate de que la entidad Store tenga una columna 'name'
-    };
+    // Devolver el objeto pos completo
+    return pos;
   }
+
   async getPosInfoByPairingCode(pairingCode: string): Promise<any> {
     const pos = await this.posRepository.findOne({
       where: { pairingCode },
