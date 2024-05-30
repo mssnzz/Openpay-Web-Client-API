@@ -7,6 +7,8 @@ import {
   Param,
   Get,
   NotFoundException,
+  Put,
+  Delete,
 } from '@nestjs/common';
 import { PosService } from './pos.service';
 
@@ -16,17 +18,16 @@ export class PosController {
 
   @Post()
   create(@Body() body: any) {
-    // Debes validar y extraer los parámetros necesarios del cuerpo de la solicitud.
-    // Esto es solo un ejemplo. En una aplicación real, deberías validar los datos de entrada.
     return this.posService.create(body.name, body.store);
   }
+
   @Post('/pairing')
   async findByPairingCode(@Body() body: { pairingCode: string }) {
     try {
       const pos = await this.posService.findByPairingCodeAndChangeStatus(
         body.pairingCode,
-        'new', // Estado inicial esperado
-        'closed', // Estado final después de la operación
+        'new',
+        'closed',
       );
       return { message: 'Success', pos };
     } catch (error) {
@@ -52,6 +53,36 @@ export class PosController {
       return posInfo;
     } catch (error) {
       throw new NotFoundException(error.message);
+    }
+  }
+
+  @Get('/brand/:brandId')
+  async getPosByBrandId(@Param('brandId') brandId: string) {
+    try {
+      const posList = await this.posService.findPosByBrandId(brandId);
+      return posList;
+    } catch (error) {
+      throw new NotFoundException(error.message);
+    }
+  }
+
+  @Put(':id')
+  async update(@Param('id') id: string, @Body() updateData: any) {
+    try {
+      const updatedPos = await this.posService.update(id, updateData);
+      return updatedPos;
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.NOT_FOUND);
+    }
+  }
+
+  @Delete(':id')
+  async delete(@Param('id') id: string) {
+    try {
+      await this.posService.delete(id);
+      return { message: 'POS deleted successfully' };
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.NOT_FOUND);
     }
   }
 }

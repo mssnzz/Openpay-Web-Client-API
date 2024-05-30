@@ -1,5 +1,5 @@
 // product.service.ts
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { Product } from './products.entity';
@@ -111,10 +111,12 @@ export class ProductService {
     product = await this.productRepository.save(product);
 
     // Fetch categories and stores
-    const categories = await this.categoryRepository.findByIds(categoryIds);
-    const stores = await this.storeRepository.findByIds(storeIds);
+    const categories = await this.categoryRepository.findByIds(
+      categoryIds || [],
+    );
+    const stores = await this.storeRepository.findByIds(storeIds || []);
     if (!categories.length || !stores.length) {
-      throw new Error('Stores or categories not found.');
+      throw new NotFoundException('Stores or categories not found.');
     }
 
     // Assign categories and stores to product and save again
@@ -123,7 +125,7 @@ export class ProductService {
     product = await this.productRepository.save(product);
 
     // Handle variations and their prices
-    for (const variationDto of variations) {
+    for (const variationDto of variations || []) {
       let variation = this.variationRepository.create({
         name: variationDto.name,
         stock: variationDto.stock,
@@ -150,7 +152,6 @@ export class ProductService {
       relations: ['categories', 'stores', 'variations', 'variations.prices'],
     });
   }
-  // product.service.ts
 
   async deleteProducts(productIds: string[]): Promise<void> {
     // Encuentra todos los productos que coinciden con los IDs proporcionados
@@ -174,5 +175,17 @@ export class ProductService {
       // Delete product
       await this.productRepository.remove(product);
     }
+  }
+
+  async findByBrandId(brandId: string): Promise<Product[]> {
+    return this.productRepository
+      .createQueryBuilder('product')
+      .innerJoinAndSelect('product.stores', 'store')
+      .leftJoinAndSelect('store.brand', 'brand') // Añadir la marca asociada con la tienda
+      .innerJoinAndSelect('product.categories', 'category')
+      .leftJoinAndSelect('product.variations', 'variation') // Añadir las variaciones del producto
+      .leftJoinAndSelect('variation.prices', 'price') // Añadir los precios de cada variación
+      .where('brand.id = :brandId', { brandId })
+      .getMany();
   }
 }

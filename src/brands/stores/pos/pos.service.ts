@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { POS } from './pos.entity';
 import Store from '../stores.entity';
+import Brands from 'src/brands/brands.entity';
 
 @Injectable()
 export class PosService {
@@ -10,7 +11,9 @@ export class PosService {
     @InjectRepository(POS)
     private readonly posRepository: Repository<POS>,
     @InjectRepository(Store)
-    private readonly storeRepository: Repository<Store>, // Inyecta el repositorio de Store
+    private readonly storeRepository: Repository<Store>,
+    @InjectRepository(Brands)
+    private readonly brandRepository: Repository<Brands>,
   ) {}
 
   generatePairingCode(): string {
@@ -25,8 +28,6 @@ export class PosService {
 
   async create(name: string, storeUuid: string): Promise<POS> {
     const pairingCode = this.generatePairingCode();
-
-    // Busca la tienda por su UUID antes de asignarla
     const store = await this.storeRepository.findOneBy({ id: storeUuid });
     if (!store) {
       throw new Error('Store not found');
@@ -36,15 +37,16 @@ export class PosService {
       name,
       status: 'inactive',
       pairingCode,
-      store, // Asigna directamente el objeto de tienda encontrado
+      store,
     });
 
     return this.posRepository.save(pos);
   }
+
   async findPosWithStoreAndBrand(id: string): Promise<POS> {
     const pos = await this.posRepository.findOne({
       where: { id },
-      relations: ['store', 'store.brand'], // Asume que tienes las relaciones 'store' en POS y 'brand' en Store
+      relations: ['store', 'store.brand'],
     });
 
     if (!pos) {
@@ -53,6 +55,7 @@ export class PosService {
 
     return pos;
   }
+
   async findByPairingCodeAndChangeStatus(
     pairingCode: string,
     initialStatus: string,
@@ -60,7 +63,7 @@ export class PosService {
   ): Promise<POS> {
     const pos = await this.posRepository.findOne({
       where: { pairingCode, status: initialStatus },
-      relations: ['store'], // Cargar la relación con Store
+      relations: ['store'],
     });
 
     if (!pos) {
@@ -71,25 +74,67 @@ export class PosService {
       throw new Error('Store information is not available');
     }
 
-    pos.status = finalStatus; // Cambiar el estado
+    pos.status = finalStatus;
     await this.posRepository.save(pos);
 
-    // Devolver el objeto pos completo
     return pos;
   }
 
   async getPosInfoByPairingCode(pairingCode: string): Promise<any> {
     const pos = await this.posRepository.findOne({
       where: { pairingCode },
-      relations: ['store'], // Asume que 'store' es el nombre de la relación en la entidad POS
+      relations: ['store'],
     });
 
     if (!pos) {
       throw new Error('POS not found with the provided pairing code.');
     }
 
-    // Aquí tienes acceso tanto a la información del POS como a la del Store relacionado
-    // Puedes devolver la información necesaria o todo el objeto POS con su tienda relacionada
     return pos;
+  }
+
+  async findPosByBrandId(brandId: string): Promise<any[]> {
+    const brand = await this.brandRepository.findOne({
+      where: { id: brandId },
+      relations: ['stores', 'stores.pos'],
+    });
+
+    if (!brand) {
+      throw new Error('Brand not found');
+    }
+
+    const posList = brand.stores.flatMap((store) =>
+      store.pos.map((pos) => ({
+        ...pos,
+        store: {
+          id: store.id,
+          name: store.name,
+          address: store.address,
+        },
+        brand: {
+          id: brand.id,
+          name: brand.name,
+        },
+      })),
+    );
+
+    return posList;
+  }
+
+  async update(id: string, updateData: any): Promise<POS> {
+    const pos = await this.posRepository.findOneBy({ id });
+    if (!pos) {
+      throw new Error('POS not found');
+    }
+    Object.assign(pos, updateData);
+    return this.posRepository.save(pos);
+  }
+
+  async delete(id: string): Promise<void> {
+    const pos = await this.posRepository.findOneBy({ id });
+    if (!pos) {
+      throw new Error('POS not found');
+    }
+    await this.posRepository.remove(pos);
   }
 }

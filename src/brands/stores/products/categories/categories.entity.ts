@@ -1,4 +1,4 @@
-// category.entity.ts
+// categories.entity.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -20,7 +20,6 @@ export class Category {
   @Column()
   color: string;
 
-  // Asegúrate de que la propiedad y la relación estén definidas correctamente
   @ManyToOne(() => Store, (store) => store.categories)
   store: Store;
 

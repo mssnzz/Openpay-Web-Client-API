@@ -1,3 +1,4 @@
+// product.entity.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -41,6 +42,9 @@ export class Product {
 
   @Column({ nullable: true })
   minimumStock: string;
+
+  @Column({ default: false })
+  isService: boolean; // Nuevo campo para indicar si el producto es un servicio
 
   @ManyToMany(() => Category, (category) => category.products)
   @JoinTable() // This decorator specifies that this is the owner side of the relationship
