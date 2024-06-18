@@ -14,6 +14,7 @@ import Brands from '../brands.entity';
 import { Employee } from './employees/employees.entity';
 import { Category } from './products/categories/categories.entity';
 import { Product } from './products/products.entity';
+import { Order } from './orders/orders.entity';
 
 @Entity()
 export class Store {
@@ -63,6 +64,9 @@ export class Store {
     },
   })
   categories: Category[];
+
+  @OneToMany(() => Order, (order) => order.store)
+  orders: Order[];
 
   // Agregando la relación Many-to-Many con Product
   @ManyToMany(() => Product, (product) => product.stores)

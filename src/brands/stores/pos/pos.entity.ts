@@ -7,6 +7,8 @@ import {
 } from 'typeorm';
 import { Store } from '../stores.entity';
 import { Corte } from '../cortes/cortes.entity';
+import { Order } from '../orders/orders.entity';
+import { Payment } from '../payments/payments.entity';
 
 @Entity()
 export class POS {
@@ -30,4 +32,10 @@ export class POS {
 
   @ManyToOne(() => Store, (store) => store.pos)
   store: Store;
+
+  @OneToMany(() => Order, (order) => order.pos)
+  orders: Order[];
+
+  @OneToMany(() => Payment, (payment) => payment.pos)
+  payments: Payment[];
 }

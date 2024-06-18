@@ -7,6 +7,8 @@ import { EmployeesModule } from './employees/employees.module';
 import { CortesModule } from './cortes/cortes.module';
 import Brands from '../brands.entity';
 import { ProductModule } from './products/products.module';
+import { OrdersModule } from './orders/orders.module';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -15,6 +17,8 @@ import { ProductModule } from './products/products.module';
     EmployeesModule,
     CortesModule,
     ProductModule,
+    OrdersModule,
+    PaymentsModule,
   ],
   providers: [StoresService],
   controllers: [StoresController],
