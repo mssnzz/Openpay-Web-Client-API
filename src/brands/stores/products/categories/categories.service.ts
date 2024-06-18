@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { Category } from './categories.entity';
 import { CreateCategoryDto } from './categories.dto';
 import Store from '../../stores.entity';
+import Brands from 'src/brands/brands.entity';
 
 @Injectable()
 export class CategoryService {
@@ -12,7 +13,9 @@ export class CategoryService {
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>,
     @InjectRepository(Store)
-    private readonly storeRepository: Repository<Store>, // Inyecta el repositorio de Store
+    private readonly storeRepository: Repository<Store>,
+    @InjectRepository(Brands)
+    private readonly brandRepository: Repository<Brands>,
   ) {}
 
   async create(createCategoryDto: CreateCategoryDto): Promise<Category> {
@@ -29,7 +32,21 @@ export class CategoryService {
   async findCategoriesByStoreId(storeId: string): Promise<Category[]> {
     return this.categoryRepository.find({
       where: { store: { id: storeId } },
-      relations: ['store'], // Agrega 'products' si también quieres los productos de la categoría
+      relations: ['store'],
     });
+  }
+
+  async findCategoriesByBrandId(brandId: string): Promise<Category[]> {
+    const stores = await this.storeRepository.find({
+      where: { brand: { id: brandId } },
+      relations: ['categories'],
+    });
+
+    const categories = stores.flatMap((store) => store.categories);
+
+    console.log('Stores:', stores);
+    console.log('Categories:', categories);
+
+    return categories;
   }
 }

@@ -13,6 +13,13 @@ export class CategoryController {
     return this.categoryService.create(createCategoryDto);
   }
 
+  @Get('brand/:brandId')
+  async findCategoriesByBrand(
+    @Param('brandId') brandId: string,
+  ): Promise<Category[]> {
+    return this.categoryService.findCategoriesByBrandId(brandId);
+  }
+
   @Get(':storeId')
   findCategoriesByStore(
     @Param('storeId') storeId: string,

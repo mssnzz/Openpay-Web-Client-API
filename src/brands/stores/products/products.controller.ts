@@ -22,6 +22,7 @@ export class ProductController {
   async create(@Body() createProductDto: CreateProductDto) {
     return this.productService.createWithVariations(createProductDto);
   }
+
   @Get('store/:storeId')
   getProductsByStore(@Param('storeId') storeId: string): Promise<Product[]> {
     return this.productService.findByStoreId(storeId);
@@ -39,5 +40,10 @@ export class ProductController {
   @Post('delete') // Using POST for deletion to include a body
   deleteProducts(@Body() body: { ids: string[] }) {
     return this.productService.deleteProducts(body.ids);
+  }
+
+  @Get('brand/:brandId')
+  getProductsByBrand(@Param('brandId') brandId: string): Promise<Product[]> {
+    return this.productService.findByBrandId(brandId);
   }
 }

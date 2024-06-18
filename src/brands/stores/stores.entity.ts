@@ -8,7 +8,6 @@ import {
   OneToMany,
   ManyToOne,
   ManyToMany,
-  JoinTable,
 } from 'typeorm';
 import Brands from '../brands.entity';
 import { Employee } from './employees/employees.entity';
@@ -45,24 +44,14 @@ export class Store {
   @OneToMany(() => POS, (pos) => pos.store)
   pos: POS[];
 
-  @ManyToOne(() => Brands, (brand) => brand.stores) // Asume que Brand tiene un array 'stores'
+  @ManyToOne(() => Brands, (brand) => brand.stores)
   brand: Brands;
 
   @OneToMany(() => Employee, (employee) => employee.store) // Nueva relación con Employee
   employees: Employee[];
 
   @ManyToMany(() => Category, (category) => category.store)
-  @JoinTable({
-    name: 'store_categories', // Nombre de la tabla de unión
-    joinColumn: {
-      name: 'storeId',
-      referencedColumnName: 'id',
-    },
-    inverseJoinColumn: {
-      name: 'categoryId',
-      referencedColumnName: 'id',
-    },
-  })
+  @OneToMany(() => Category, (category) => category.store)
   categories: Category[];
 
   @OneToMany(() => Order, (order) => order.store)
