@@ -45,8 +45,9 @@ export class UserController {
       email: string;
       roleId: any; // Cambiado a string para UUID
       accessPin: number;
-      storeId: string;
+      storeId?: string; // storeId es opcional
       password: string; // Añade el campo password
+      brandId: string;
     },
   ): Promise<User> {
     // Pasar todos los datos incluyendo la contraseña al servicio de creación de usuarios
@@ -55,8 +56,9 @@ export class UserController {
       userData.email,
       userData.roleId,
       userData.accessPin,
-      userData.storeId,
-      userData.password, // Incluir la contraseña
+      userData.brandId,
+      userData.storeId || null, // Asegúrate de que storeId puede ser null
+      userData.password, // Asegúrate de pasar la contraseña
     );
   }
 

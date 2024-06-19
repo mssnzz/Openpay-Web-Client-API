@@ -28,22 +28,30 @@ export class UserService {
     email: string,
     roleId: number,
     accessPin: number,
-    storeId: string,
-    password: string, // Añade la contraseña como un parámetro
+    brandId: string,
+    storeId: string | null, // storeId puede ser null
+    password: string,
   ): Promise<User> {
     const role = await this.roleRepository.findOne({ where: { id: roleId } });
     if (!role) {
       throw new Error('Role not found');
     }
 
-    const store = await this.storeRepository.findOne({
-      where: { id: storeId },
+    const brand = await this.brandsRepository.findOne({
+      where: { id: brandId },
     });
-    if (!store) {
-      throw new Error('Store not found');
+    if (!brand) {
+      throw new Error('Brand not found');
     }
 
-    // Hashea la contraseña antes de almacenarla
+    let store: Store | null = null;
+    if (storeId) {
+      store = await this.storeRepository.findOne({ where: { id: storeId } });
+      if (!store) {
+        throw new Error('Store not found');
+      }
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = this.usersRepository.create({
@@ -51,8 +59,9 @@ export class UserService {
       email,
       role,
       accessPin,
-      store,
-      password: hashedPassword, // Almacena la contraseña hasheada
+      brands: brand,
+      password: hashedPassword,
+      store: store || undefined, // Asigna store solo si no es null
     });
 
     return this.usersRepository.save(newUser);

@@ -28,7 +28,7 @@ export class User {
   @ManyToOne(() => Role, role => role.users) // La relación ManyToOne con Role
   role: Role; // Asegúrate de que la propiedad se llame 'role'
 
-  @ManyToOne(() => Store, store => store.users)
+  @ManyToOne(() => Store, store => store.users, { nullable: true }) // Relación opcional
   store: Store;
 
   @ManyToOne(() => Brands, brands => brands.users)

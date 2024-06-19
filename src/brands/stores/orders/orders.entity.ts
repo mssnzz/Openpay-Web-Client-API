@@ -5,9 +5,10 @@ import {
   ManyToOne,
   OneToMany,
 } from 'typeorm';
-import Store from '../stores.entity';
 import { Payment } from '../payments/payments.entity';
 import { POS } from '../pos/pos.entity';
+import { CartItem } from './cart/items.entity';
+import Store from '../stores.entity';
 
 @Entity()
 export class Order {
@@ -28,4 +29,7 @@ export class Order {
 
   @ManyToOne(() => POS, (pos) => pos.orders)
   pos: POS;
+
+  @OneToMany(() => CartItem, (cartItem) => cartItem.order, { cascade: true })
+  cartItems: CartItem[];
 }
